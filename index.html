@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0d9488">
+<meta name="description" content="تطبيق صحتي - تذكير ذكي بالفحوصات والأدوية">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="صحتي">
+<title>صحتي - تذكير بالفحوصات والأدوية</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%230d9488' width='192' height='192' rx='32'/%3E%3Ctext x='96' y='120' font-size='90' text-anchor='middle'%3E💊%3C/text%3E%3C/svg%3E">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif}
+body{background:#f0fdfa;color:#1e293b;min-height:100vh}
+.container{max-width:600px;margin:0 auto;padding:16px}
+header{text-align:center;padding:24px 0}
+header h1{color:#0f766e;font-size:1.8rem}
+header p{color:#64748b;font-size:.9rem;margin-top:4px}
+.tabs{display:flex;gap:8px;margin-bottom:20px;background:#fff;padding:6px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.tab{flex:1;padding:12px;border:none;background:transparent;color:#64748b;font-size:1rem;border-radius:8px;cursor:pointer;font-weight:600;transition:.2s}
+.tab.active{background:#0d9488;color:#fff}
+.section{display:none}
+.section.active{display:block}
+.card{background:#fff;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid #ccfbf1}
+.card-title{font-size:1.1rem;color:#0f766e;margin-bottom:14px;font-weight:700}
+.form-group{margin-bottom:14px}
+label{display:block;margin-bottom:5px;font-weight:600;font-size:.95rem}
+.hint{font-size:.78rem;color:#64748b;margin-top:3px}
+input,select,textarea{width:100%;padding:12px 14px;border:2px solid #ccfbf1;border-radius:10px;font-size:1rem;background:#fff}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#0d9488}
+textarea{resize:vertical;min-height:70px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;background:#0d9488;color:#fff;transition:.2s}
+.btn:hover{background:#0f766e}
+.btn:active{background:#115e59;transform:scale(.98)}
+.alert{background:#fff7ed;border-right:4px solid #f59e0b;padding:14px;border-radius:10px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+.alert-icon{font-size:1.4rem}
+.alert-title{font-weight:700;color:#9a3412;font-size:.95rem}
+.alert-desc{font-size:.87rem;color:#c2410c;margin-top:2px}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:700}
+.badge-day{background:#fee2e2;color:#991b1b}
+.badge-week{background:#fef3c7;color:#92400e}
+.badge-ok{background:#d1fae5;color:#065f46}
+.empty{text-align:center;padding:40px 20px;color:#64748b}
+.empty-icon{font-size:3rem;margin-bottom:10px;opacity:.5}
+.item{background:#f8fafc;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #e2e8f0;position:relative}
+.item-name{font-weight:700;font-size:1.05rem}
+.item-meta{font-size:.85rem;color:#64748b;line-height:1.7;margin-top:4px}
+.item-rec{background:#eff6ff;border-right:3px solid #3b82f6;padding:8px 12px;border-radius:8px;margin-top:8px;font-size:.88rem;color:#1e40af}
+.delete-btn{position:absolute;top:10px;left:10px;background:#ef4444;color:#fff;border:none;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:1.2rem;line-height:1;display:flex;align-items:center;justify-content:center;transition:.2s}
+.delete-btn:hover{background:#dc2626;transform:scale(1.1)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.stat{background:#fff;padding:16px;border-radius:12px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.stat-value{font-size:1.6rem;font-weight:800;color:#0d9488}
+.stat-label{font-size:.85rem;color:#64748b;margin-top:4px}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:12px 24px;border-radius:50px;font-weight:600;opacity:0;transition:.3s;pointer-events:none;z-index:1000}
+#toast.show{opacity:1}
+.info-box{background:#eff6ff;border-right:4px solid #3b82f6;padding:12px;border-radius:8px;margin-bottom:14px;font-size:.88rem;color:#1e40af}
+.saved-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{background:#0d9488;color:#fff;padding:4px 10px;border-radius:20px;font-size:.78rem;cursor:pointer;transition:.2s}
+.chip:hover{background:#0f766e}
+.ac-list{position:absolute;top:100%;right:0;left:0;background:#fff;border:1px solid #ccfbf1;border-radius:10px;max-height:180px;overflow-y:auto;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.1);display:none}
+.ac-list.show{display:block}
+.ac-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid #f1f5f9;font-size:.95rem}
+.ac-item:hover{background:#f0fdfa;color:#0f766e}
+.ac-wrap{position:relative}
+.install-btn{position:fixed;top:16px;left:16px;background:#0d9488;color:#fff;border:none;padding:8px 16px;border-radius:20px;font-size:.85rem;font-weight:600;cursor:pointer;display:none;box-shadow:0 2px 8px rgba(0,0,0,.15);z-index:999}
+.install-btn.show{display:block}
+@media(max-width:480px){.container{padding:12px}.row{grid-template-columns:1fr}header h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="container">
+<header><h1>💊 صحتي</h1><p>تذكير ذكي بالفحوصات والأدوية</p></header>
+
+<button class="install-btn" id="installBtn">📲 تثبيت التطبيق</button>
+
+<div class="stats">
+<div class="stat"><div class="stat-value" id="stE">0</div><div class="stat-label">الفحوصات</div></div>
+<div class="stat"><div class="stat-value" id="stM">0</div><div class="stat-label">الأدوية</div></div>
+</div>
+
+<div class="tabs">
+<button class="tab active" id="t0">📋 التنبيهات</button>
+<button class="tab" id="t1">🩺 الفحوصات</button>
+<button class="tab" id="t2">💊 الأدوية</button>
+</div>
+
+<div id="s0" class="section active">
+<div class="card">
+<div class="card-title">🔔 التنبيهات القادمة</div>
+<div class="info-box">
+📌 الفحص: تنبيه قبل <strong>أسبوع</strong> من الموعد<br>
+📌 الدواء: تنبيه قبل <strong>يومين</strong> من الانتهاء
+</div>
+<div id="alerts"></div>
+</div>
+</div>
+
+<div id="s1" class="section">
+<div class="card">
+<div class="card-title">➕ إضافة فحص</div>
+<div class="form-group"><label>نوع الفحص *</label><input type="text" id="eName" placeholder="مثال: تحليل سكر صائم"></div>
+<div class="form-group"><label>تاريخ آخر فحص *</label><input type="date" id="eDate"></div>
+<div class="form-group"><label>التكرار *</label><select id="eFreq"><option value="1">كل شهر</option><option value="2">كل شهرين</option><option value="3" selected>كل 3 أشهر</option><option value="6">كل 6 أشهر</option><option value="12">كل سنة</option></select></div>
+<div class="form-group"><label>📅 تاريخ الموعد القادم (اختياري)</label><input type="date" id="eNext"><div class="hint">إذا حدده الطبيب، اكتبه هنا</div></div>
+<div class="form-group"><label>📝 توصية الطبيب (اختياري)</label><textarea id="eRec" placeholder="مثال: تحليل دم + أشعة..."></textarea></div>
+<button class="btn" id="bE">حفظ الفحص</button>
+</div>
+<div id="eList"></div>
+</div>
+
+<div id="s2" class="section">
+<div class="card">
+<div class="card-title">➕ إضافة دواء</div>
+<div class="form-group"><label>اسم الدواء *</label><div class="ac-wrap"><input type="text" id="mName" placeholder="اكتب اسم الدواء..." autocomplete="off"><div class="ac-list" id="acList"></div></div><div class="saved-chips" id="chips"></div></div>
+<div class="row"><div class="form-group"><label>تاريخ البدء *</label><input type="date" id="mStart"></div><div class="form-group"><label>عدد العلب *</label><input type="number" id="mBox" value="1" min="1"></div></div>
+<div class="row"><div class="form-group"><label>حبات كل علبة *</label><input type="number" id="mPer" placeholder="30" min="1"></div><div class="form-group"><label>الجرعة اليومية *</label><input type="number" id="mDose" placeholder="2" min="1"></div></div>
+<button class="btn" id="bM">حفظ الدواء</button>
+</div>
+<div id="mList"></div>
+</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(function(){
+const KEY='se7ti_v7';
+let D={exams:[],meds:[],names:[]};
+
+function ld(){var r=localStorage.getItem(KEY);if(r)D=JSON.parse(r);rd();}
+function sv(){localStorage.setItem(KEY,JSON.stringify(D));rd();}
+function ts(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+
+// ===== TABS =====
+function swTab(n){
+document.getElementById('t0').classList.toggle('active',n===0);
+document.getElementById('t1').classList.toggle('active',n===1);
+document.getElementById('t2').classList.toggle('active',n===2);
+document.getElementById('s0').classList.toggle('active',n===0);
+document.getElementById('s1').classList.toggle('active',n===1);
+document.getElementById('s2').classList.toggle('active',n===2);
+rd();
+}
+document.getElementById('t0').addEventListener('click',function(){swTab(0);});
+document.getElementById('t1').addEventListener('click',function(){swTab(1);});
+document.getElementById('t2').addEventListener('click',function(){swTab(2);});
+
+// ===== DATES =====
+function td(){return new Date().toISOString().split('T')[0];}
+function ad(ds,d){var x=new Date(ds);x.setDate(x.getDate()+d);return x.toISOString().split('T')[0];}
+function am(ds,m){var x=new Date(ds);x.setMonth(x.getMonth()+parseInt(m));return x.toISOString().split('T')[0];}
+function df(f,t){return Math.ceil((new Date(t)-new Date(f))/(864e5));}
+function fd(d){return new Date(d).toLocaleDateString('ar-SA',{year:'numeric',month:'long',day:'numeric'});}
+
+// ===== EXAMS =====
+document.getElementById('bE').addEventListener('click',function(){
+var n=document.getElementById('eName').value.trim(),d=document.getElementById('eDate').value,f=document.getElementById('eFreq').value,ne=document.getElementById('eNext').value,rc=document.getElementById('eRec').value.trim();
+if(!n||!d)return ts('⌛ أكمل الحقول الإلزامية');
+D.exams.push({id:Date.now(),name:n,date:d,freq:f,next:ne,rec:rc});
+sv();
+document.getElementById('eName').value='';document.getElementById('eDate').value='';document.getElementById('eNext').value='';document.getElementById('eRec').value='';
+ts('✅ تم حفظ الفحص');
+});
+function delE(id){D.exams=D.exams.filter(function(e){return e.id!==id;});sv();ts('🗑️ تم الحذف');}
+function gNxt(e){return e.next||am(e.date,e.freq);}
+
+// ===== MEDS =====
+document.getElementById('bM').addEventListener('click',function(){
+var n=document.getElementById('mName').value.trim(),b=parseInt(document.getElementById('mBox').value)||1,p=parseInt(document.getElementById('mPer').value),d=parseInt(document.getElementById('mDose').value),s=document.getElementById('mStart').value||td();
+if(!n||!p||!d)return ts('⌛ أكمل جميع الحقول');
+var tq=b*p,dy=Math.floor(tq/d);
+D.meds.push({id:Date.now(),name:n,boxes:b,perBox:p,total:tq,dose:d,start:s,days:dy});
+if(D.names.indexOf(n)===-1)D.names.push(n);
+sv();
+document.getElementById('mName').value='';document.getElementById('mBox').value='1';document.getElementById('mPer').value='';document.getElementById('mDose').value='';document.getElementById('mStart').value='';hideAC();
+ts('✅ تم حفظ الدواء');
+});
+function delM(id){D.meds=D.meds.filter(function(m){return m.id!==id;});sv();ts('🗑️ تم الحذف');}
+
+// ===== AUTOCOMPLETE =====
+var inp=document.getElementById('mName'),lst=document.getElementById('acList');
+inp.addEventListener('input',function(){
+var v=inp.value.trim();if(!v){hideAC();return;}
+var m=D.names.filter(function(n){return n.indexOf(v)!==-1;});
+if(!m.length){hideAC();return;}
+lst.innerHTML=m.map(function(n){return '<div class="ac-item" onclick="selN(''+n.replace(/'/g,"\'")+'')">'+n+'</div>';}).join('');
+lst.classList.add('show');
+});
+inp.addEventListener('blur',function(){setTimeout(hideAC,200);});
+function hideAC(){lst.classList.remove('show');}
+function selN(n){inp.value=n;hideAC();}
+function rdChips(){
+var c=document.getElementById('chips');
+if(!D.names.length){c.innerHTML='';return;}
+c.innerHTML='<div class="hint" style="width:100%;margin-bottom:4px;">أدوية مسجلة:</div>'+D.names.map(function(n){return '<span class="chip" onclick="selN(''+n.replace(/'/g,"\'")+'')">'+n+'</span>';}).join('');
+}
+
+// ===== RENDER =====
+function rd(){
+document.getElementById('stE').textContent=D.exams.length;
+document.getElementById('stM').textContent=D.meds.length;
+rdExams();rdMeds();rdAlerts();rdChips();
+}
+function rdExams(){
+var c=document.getElementById('eList');
+if(!D.exams.length){c.innerHTML='<div class="empty"><div class="empty-icon">🩺</div>لا توجد فحوصات</div>';return;}
+c.innerHTML=D.exams.map(function(e){
+var nx=gNxt(e),rm=df(td(),nx);
+var bg=rm<=7?'<span class="badge badge-day">قريب</span>':'<span class="badge badge-ok">بعيد</span>';
+var nl=e.next?'📅 موعد محدد':'⏳ حساب تلقائي';
+var rc=e.rec?'<div class="item-rec">📝 '+e.rec+'</div>':'';
+return '<div class="item"><button class="delete-btn" onclick="delE('+e.id+')">×</button><div class="item-name">'+e.name+' '+bg+'</div><div class="item-meta">📅 آخر فحص: '+fd(e.date)+'<br>🔁 كل '+e.freq+' أشهر<br>'+nl+': '+fd(nx)+' ('+(rm<=0?'متأخر!':rm+' يوم')+')</div>'+rc+'</div>';
+}).join('');
+}
+function rdMeds(){
+var c=document.getElementById('mList');
+if(!D.meds.length){c.innerHTML='<div class="empty"><div class="empty-icon">💊</div>لا توجد أدوية</div>';return;}
+c.innerHTML=D.meds.map(function(m){
+var en=ad(m.start,m.days),rm=df(td(),en);
+var bg=rm<=2?'<span class="badge badge-day">ينفذ!</span>':rm<=7?'<span class="badge badge-week">أسبوع</span>':'<span class="badge badge-ok">متوفر</span>';
+return '<div class="item"><button class="delete-btn" onclick="delM('+m.id+')">×</button><div class="item-name">'+m.name+' '+bg+'</div><div class="item-meta">📦 '+m.boxes+' علبة × '+m.perBox+' حبة = <strong>'+m.total+' حبة</strong><br>💊 '+m.dose+'/يوم | تكفي <strong>'+m.days+' يوم</strong><br>📅 '+fd(m.start)+' → '+fd(en)+'<br>⏳ '+(rm<=0?'انتهى!':rm+' يوم')+'</div></div>';
+}).join('');
+}
+function rdAlerts(){
+var c=document.getElementById('alerts'),al=[];
+D.exams.forEach(function(e){
+var nx=gNxt(e),d=df(td(),nx);
+if(d<=7&&d>0){
+var ds='الفحص القادم '+fd(nx)+' --- '+d+' أيام. اذهب للطبيب لحجز الموعد'+(e.rec?'<br>📝 '+e.rec:'');
+al.push({i:'🩺',t:'فحص '+e.name,d:ds,u:d<=3?'day':'week'});
+}else if(d<=0){
+var ds='متأخر! كان بتاريخ '+fd(nx)+(e.rec?'<br>📝 '+e.rec:'');
+al.push({i:'⚠️',t:'فحص '+e.name+' متأخر',d:ds,u:'day'});
+}
+});
+D.meds.forEach(function(m){
+var en=ad(m.start,m.days),d=df(td(),en);
+if(d<=2&&d>0)al.push({i:'💊',t:'دواء '+m.name+' ينفذ!',d:'يتبقى '+d+(d===1?' يوم':' أيام')+' --- تحضر لشراء العبوة',u:'day'});
+else if(d<=0)al.push({i:'⛔',t:'دواء '+m.name+' انتهى',d:'انتهى بتاريخ '+fd(en),u:'day'});
+});
+if(D.meds.length>1){
+var am=D.meds.filter(function(m){return df(td(),ad(m.start,m.days))>0;});
+if(am.length>1){
+var md=am.map(function(m){return{n:m.name,d:df(td(),ad(m.start,m.days))};});
+var sh=md.reduce(function(a,b){return a.d<b.d?a:b;});
+if(sh.d<=7&&sh.d>2){
+var om=md.filter(function(x){return x.n!==sh.n&&x.d>sh.d;});
+var ds='"'+sh.n+'" الأقرب للانتهاء ('+sh.d+' يوم). اذهب للطبيب لطلب وصفة جديدة.'+(om.length?' (باقي: '+om.map(function(x){return x.n+' '+x.d+'ي';}).join('، ')+')':'');
+al.push({i:'📋',t:'تنبيه ذكي',d:ds,u:'week'});
+}
+}
+}
+if(!al.length){c.innerHTML='<div class="empty"><div class="empty-icon">🎉</div>لا توجد تنبيهات --- كل شيء تحت السيطرة!</div>';return;}
+al.sort(function(a,b){return a.u==='day'?-1:1;});
+c.innerHTML=al.map(function(a){return '<div class="alert"><div class="alert-icon">'+a.i+'</div><div><div class="alert-title">'+a.t+'</div><div class="alert-desc">'+a.d+'</div></div><span class="badge badge-'+a.u+'">'+(a.u==='day'?'عاجل':'تنبيه')+'</span></div>';}).join('');
+}
+
+// ===== PWA INSTALL =====
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBtn').classList.add('show');
+});
+document.getElementById('installBtn').addEventListener('click', async function() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') {
+    ts('✅ تم تثبيت التطبيق');
+  }
+  deferredPrompt = null;
+  document.getElementById('installBtn').classList.remove('show');
+});
+
+
+// ===== SERVICE WORKER =====
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js').then(function(registration) {
+      console.log('SW registered: ', registration.scope);
+    }).catch(function(error) {
+      console.log('SW registration failed: ', error);
+    });
+  });
+}
+
+// ===== INIT =====
+document.getElementById('eDate').value=td();
+document.getElementById('mStart').value=td();
+ld();
+if(D.exams.length||D.meds.length)setTimeout(function(){var a=document.querySelectorAll('.alert').length;if(a)ts('🔔 لديك '+a+' تنبيهات');},500);
+})();
+</script>
+</body>
+</html>
